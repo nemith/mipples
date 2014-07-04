@@ -15,7 +15,7 @@ type Irc struct {
 	*irc.Conn
 }
 
-func (c *Irc) AddCommand(command string, handler CommandHandler) {
+func (i *Irc) AddCommand(command string, handler CommandHandler) {
 	c.AddHandler("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
 		command := command
 		msg := parsePrivmsg(line)
@@ -31,7 +31,7 @@ func (c *Irc) AddCommand(command string, handler CommandHandler) {
 	})
 }
 
-func (c *Irc) AddMatch(matcher *regexp.Regexp, handler MatchHandler) {
+func (i *Irc) AddMatch(matcher *regexp.Regexp, handler MatchHandler) {
 	c.AddHandler("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
 		msg := parsePrivmsg(line)
 
