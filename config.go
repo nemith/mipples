@@ -21,7 +21,7 @@ type ConfigNetworks struct {
 	Server        string                   `json:"host"`
 	SSL           bool                     `json:"ssl,omitempty"`
 	Channels      map[string]ChannelConfig `json:"channels"`
-	OnConnectCmds []string                 `json:"on_connect_command"`
+	OnConnectCmds []string                 `json:"on_connect_commands"`
 }
 
 func (cn *ConfigNetworks) IrcConfig() *irc.Config {

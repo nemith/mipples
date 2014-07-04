@@ -2,10 +2,14 @@ package main
 
 import (
 	irc "github.com/fluffle/goirc/client"
+	irclog "github.com/fluffle/goirc/logging"
+	"time"
 )
 
 func main() {
 	config := loadConfig()
+
+	irclog.SetLogger(LogrusAdapter{log})
 
 	cfg := config.Network.IrcConfig()
 	c := Irc{irc.Client(cfg)}
@@ -15,6 +19,7 @@ func main() {
 		for _, cmd := range config.Network.OnConnectCmds {
 			conn.Raw(cmd)
 		}
+		time.Sleep(500 * time.Millisecond)
 		for channel, _ := range config.Network.Channels {
 			conn.Join(channel)
 		}

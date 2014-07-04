@@ -14,4 +14,7 @@ func init() {
 	if err != nil {
 		panic(fmt.Sprintf("Got error when connect database, the error is '%v'", err))
 	}
+
+	db.LogMode(true)
+	db.SetLogger(log)
 }
