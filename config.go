@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	irc "github.com/fluffle/goirc/client"
 	"io/ioutil"
 )
 
@@ -17,11 +18,22 @@ type ChannelConfig struct {
 
 type ConfigNetworks struct {
 	Nick          string                   `json:"nick"`
-	Host          string                   `json:"host"`
-	Port          int                      `json:"port,omitempty"`
+	Server        string                   `json:"host"`
 	SSL           bool                     `json:"ssl,omitempty"`
 	Channels      map[string]ChannelConfig `json:"channels"`
 	OnConnectCmds []string                 `json:"on_connect_command"`
+}
+
+func (cn *ConfigNetworks) IrcConfig() *irc.Config {
+	cfg := irc.NewConfig(cn.Nick)
+	cfg.SSL = cn.SSL
+	cfg.Server = cn.Server
+
+	cfg.Me.Ident = "mipples"
+	cfg.Me.Name = "Mipples bot (http://github.com/nemith/mipples)"
+	cfg.QuitMessage = "I love dem mipples!"
+	return cfg
+
 }
 
 func loadConfig() *Config {

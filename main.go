@@ -7,11 +7,11 @@ import (
 func main() {
 	config := loadConfig()
 
-	c := Irc{irc.SimpleClient(config.Network.Nick)}
-	c.SSL = config.Network.SSL
+	cfg := config.Network.IrcConfig()
+	c := Irc{irc.Client(cfg)}
 	c.EnableStateTracking()
 
-	c.AddHandler(irc.CONNECTED, func(conn *irc.Conn, line *irc.Line) {
+	c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
 		for _, cmd := range config.Network.OnConnectCmds {
 			conn.Raw(cmd)
 		}
@@ -21,12 +21,12 @@ func main() {
 	})
 
 	quit := make(chan bool)
-	c.AddHandler(irc.DISCONNECTED,
+	c.HandleFunc("disconnected",
 		func(conn *irc.Conn, line *irc.Line) { quit <- true })
 
 	module.InitModules(&c, config)
 
-	if err := c.Connect(config.Network.Host); err != nil {
+	if err := c.ConnectTo(config.Network.Server); err != nil {
 		panic(err)
 	}
 

@@ -15,8 +15,8 @@ type Irc struct {
 	*irc.Conn
 }
 
-func (i *Irc) AddCommand(command string, handler CommandHandler) {
-	c.AddHandler("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
+func (c *Irc) AddCommand(command string, handler CommandHandler) {
+	c.HandleFunc("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
 		command := command
 		msg := parsePrivmsg(line)
 		if msg.isToChannel() {
@@ -31,8 +31,8 @@ func (i *Irc) AddCommand(command string, handler CommandHandler) {
 	})
 }
 
-func (i *Irc) AddMatch(matcher *regexp.Regexp, handler MatchHandler) {
-	c.AddHandler("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
+func (c *Irc) AddMatch(matcher *regexp.Regexp, handler MatchHandler) {
+	c.HandleFunc("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
 		msg := parsePrivmsg(line)
 
 		matches := matcher.FindStringSubmatch(msg.Text)

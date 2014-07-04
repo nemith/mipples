@@ -62,7 +62,7 @@ func (k *KarmaModule) collectorHandler(conn *irc.Conn, msg *Privmsg, match []str
 		return
 	}
 
-	nick := conn.ST.GetNick(nickStr)
+	nick := conn.StateTracker().GetNick(nickStr)
 	if nick == nil {
 		// not a valid nick
 		return
