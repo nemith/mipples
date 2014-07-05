@@ -37,8 +37,8 @@ var karmaRegexp = regexp.MustCompile(`^([^\+]+)(\+\+|--)$`)
 
 func (k *KarmaModule) Init(c *irc.Conn, config json.RawMessage) {
 	db.AutoMigrate(&Karma{})
-	c.HandleBG("PRIVMSG", NewBangCmd("karma", k.karmaCmdHandler))
-	c.HandleBG("PRIVMSG", NewRegexpMatch(karmaRegexp, k.collectorHandler))
+	c.HandleBG("PRIVMSG", NewCommandHandler("karma", k.karmaCmdHandler))
+	c.HandleBG("PRIVMSG", NewMatchHandler(karmaRegexp, k.collectorHandler))
 }
 
 func (k *KarmaModule) karmaCmdHandler(conn *irc.Conn, cmd *Cmd) {

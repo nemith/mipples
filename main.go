@@ -11,8 +11,8 @@ func main() {
 
 	irclog.SetLogger(LogrusAdapter{*log})
 
-	cfg := config.Network.IrcConfig()
-	c := irc.Client(cfg)
+	ircCfg := config.Network.IrcConfig()
+	c := irc.Client(ircCfg)
 	c.EnableStateTracking()
 
 	module.InitModules(c, config)
@@ -21,7 +21,6 @@ func main() {
 		for _, cmd := range config.Network.OnConnectCmds {
 			conn.Raw(cmd)
 		}
-		time.Sleep(2 * time.Second)
 		for channel, _ := range config.Network.Channels {
 			conn.Join(channel)
 		}

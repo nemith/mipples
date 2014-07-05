@@ -8,8 +8,7 @@ import (
 	"strings"
 )
 
-type CommandHandler func(*irc.Conn, *Cmd)
-type MatchHandler func(*irc.Conn, *Privmsg, []string)
+type CommandHandlerFunc func(*irc.Conn, *Cmd)
 
 type Cmd struct {
 	Command string
@@ -17,60 +16,62 @@ type Cmd struct {
 	*Privmsg
 }
 
-type BangCmdHandler struct {
+type CommandHandler struct {
 	command     string
-	handlerFunc CommandHandler
+	handlerFunc CommandHandlerFunc
 }
 
-func NewBangCmd(command string, handler CommandHandler) *BangCmdHandler {
+func NewCommandHandler(command string, handler CommandHandlerFunc) *CommandHandler {
 	log.WithFields(logrus.Fields{
 		"command": command,
 	}).Debug("Registering new irc command")
-	return &BangCmdHandler{
+	return &CommandHandler{
 		command:     command,
 		handlerFunc: handler,
 	}
 
 }
 
-func (bch BangCmdHandler) Handle(c *irc.Conn, line *irc.Line) {
+func (h CommandHandler) Handle(c *irc.Conn, line *irc.Line) {
 	msg := parsePrivmsg(line)
 	if msg.Public() {
-		bch.command = fmt.Sprintf("!%s", bch.command)
+		h.command = fmt.Sprintf("!%s", h.command)
 	}
-	if strings.HasPrefix(msg.Text, bch.command) {
+	if strings.HasPrefix(msg.Text, h.command) {
 		log.WithFields(logrus.Fields{
 			"nick":    msg.Nick,
 			"channel": msg.Channel,
 			"text":    msg.Text,
-			"command": bch.command,
+			"command": h.command,
 		}).Debug("Executing irc command")
-		bch.handlerFunc(c, &Cmd{
-			Command: bch.command,
+		h.handlerFunc(c, &Cmd{
+			Command: h.command,
 			Args:    strings.Split(msg.Text, " ")[1:],
 			Privmsg: msg})
 	}
 }
 
-type RegexpMatchHandler struct {
+type MatchHandlerFunc func(*irc.Conn, *Privmsg, []string)
+
+type MatchHandler struct {
 	matcher     *regexp.Regexp
-	handlerFunc MatchHandler
+	handlerFunc MatchHandlerFunc
 }
 
-func NewRegexpMatch(matcher *regexp.Regexp, handler MatchHandler) *RegexpMatchHandler {
+func NewMatchHandler(matcher *regexp.Regexp, handler MatchHandlerFunc) *MatchHandler {
 	log.WithFields(logrus.Fields{
 		"matcher": matcher,
 	}).Debug("Registering new irc regex matcher")
-	return &RegexpMatchHandler{
+	return &MatchHandler{
 		matcher:     matcher,
 		handlerFunc: handler,
 	}
 }
 
-func (rmh RegexpMatchHandler) Handle(c *irc.Conn, line *irc.Line) {
+func (h MatchHandler) Handle(c *irc.Conn, line *irc.Line) {
 	msg := parsePrivmsg(line)
 
-	matches := rmh.matcher.FindStringSubmatch(msg.Text)
+	matches := h.matcher.FindStringSubmatch(msg.Text)
 	if matches == nil {
 		return
 	}
@@ -78,10 +79,10 @@ func (rmh RegexpMatchHandler) Handle(c *irc.Conn, line *irc.Line) {
 		"nick":    msg.Nick,
 		"channel": msg.Channel,
 		"text":    msg.Text,
-		"matcher": rmh.matcher,
+		"matcher": h.matcher,
 		"matches": matches,
 	}).Debug("Executing irc regex matcher")
-	rmh.handlerFunc(c, msg, matches)
+	h.handlerFunc(c, msg, matches)
 }
 
 type Privmsg struct {

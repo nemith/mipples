@@ -24,7 +24,7 @@ type ConfigNetworks struct {
 	OnConnectCmds []string                 `json:"on_connect_commands"`
 }
 
-func (cn *ConfigNetworks) IrcConfig() *irc.Config {
+func (cn *ConfigNetworks) GoIrcConfig() *irc.Config {
 	cfg := irc.NewConfig(cn.Nick)
 	cfg.SSL = cn.SSL
 	cfg.Server = cn.Server
