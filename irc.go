@@ -2,45 +2,80 @@ package main
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	irc "github.com/fluffle/goirc/client"
 	"regexp"
 	"strings"
-	"unicode/utf8"
 )
 
 type CommandHandler func(*irc.Conn, *Cmd)
 type MatchHandler func(*irc.Conn, *Privmsg, []string)
 
-type Irc struct {
-	*irc.Conn
+type Cmd struct {
+	Command string
+	Args    []string
+	*Privmsg
 }
 
-func (c *Irc) AddCommand(command string, handler CommandHandler) {
-	c.HandleFunc("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
-		command := command
-		msg := parsePrivmsg(line)
-		if msg.isToChannel() {
-			command = fmt.Sprintf("!%s", command)
-		}
-		if strings.HasPrefix(msg.Text, command) {
-			handler(c, &Cmd{
-				Command: command,
-				Args:    strings.Split(msg.Text, " ")[1:],
-				Privmsg: msg})
-		}
-	})
+type BangCmdHandler struct {
+	command     string
+	handlerFunc CommandHandler
 }
 
-func (c *Irc) AddMatch(matcher *regexp.Regexp, handler MatchHandler) {
-	c.HandleFunc("PRIVMSG", func(c *irc.Conn, line *irc.Line) {
-		msg := parsePrivmsg(line)
+func NewBangCmd(command string, handler CommandHandler) *BangCmdHandler {
+	log.WithFields(logrus.Fields{
+		"command": command,
+	}).Debug("Registering new irc command")
+	return &BangCmdHandler{
+		command:     command,
+		handlerFunc: handler,
+	}
 
-		matches := matcher.FindStringSubmatch(msg.Text)
-		if matches == nil {
-			return
-		}
-		handler(c, msg, matches)
-	})
+}
+
+func (bch BangCmdHandler) Handle(c *irc.Conn, line *irc.Line) {
+	msg := parsePrivmsg(line)
+	if msg.Public() {
+		bch.command = fmt.Sprintf("!%s", bch.command)
+	}
+	if strings.HasPrefix(msg.Text, bch.command) {
+		log.WithFields(logrus.Fields{
+			"command": bch.command,
+		}).Debug("Executing irc command")
+		bch.handlerFunc(c, &Cmd{
+			Command: bch.command,
+			Args:    strings.Split(msg.Text, " ")[1:],
+			Privmsg: msg})
+	}
+}
+
+type RegexpMatchHandler struct {
+	matcher     *regexp.Regexp
+	handlerFunc MatchHandler
+}
+
+func NewRegexpMatch(matcher *regexp.Regexp, handler MatchHandler) *RegexpMatchHandler {
+	log.WithFields(logrus.Fields{
+		"matcher": matcher,
+	}).Debug("Registering new irc regex matcher")
+	return &RegexpMatchHandler{
+		matcher:     matcher,
+		handlerFunc: handler,
+	}
+}
+
+func (rmh RegexpMatchHandler) Handle(c *irc.Conn, line *irc.Line) {
+	msg := parsePrivmsg(line)
+
+	matches := rmh.matcher.FindStringSubmatch(msg.Text)
+	if matches == nil {
+		return
+	}
+	log.WithFields(logrus.Fields{
+		"matcher": rmh.matcher,
+		"matches": matches,
+	}).Debug("Executing irc regex matcher")
+	rmh.handlerFunc(c, msg, matches)
 }
 
 type Privmsg struct {
@@ -57,7 +92,7 @@ func parsePrivmsg(line *irc.Line) *Privmsg {
 }
 
 func (m *Privmsg) respond(conn *irc.Conn, msg string, includeToNick bool) {
-	if m.isToChannel() {
+	if m.Public() {
 		if includeToNick {
 			msg = fmt.Sprintf("%s: %s", m.Nick, msg)
 		}
@@ -73,19 +108,4 @@ func (m *Privmsg) Respond(conn *irc.Conn, msg string) {
 
 func (m *Privmsg) RespondToNick(conn *irc.Conn, msg string) {
 	m.respond(conn, msg, true)
-}
-
-func (m *Privmsg) isToChannel() bool {
-	fmt.Println(m.Channel)
-	chr, _ := utf8.DecodeRuneInString(m.Channel)
-	if chr == '#' || chr == '&' {
-		return true
-	}
-	return false
-}
-
-type Cmd struct {
-	Command string
-	Args    []string
-	*Privmsg
 }

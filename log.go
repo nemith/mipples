@@ -11,7 +11,7 @@ func init() {
 }
 
 type LogrusAdapter struct {
-	*logrus.Logger
+	logrus.Logger
 }
 
 func (a LogrusAdapter) Debug(format string, args ...interface{}) {

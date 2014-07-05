@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	irc "github.com/fluffle/goirc/client"
 	"regexp"
 )
@@ -34,10 +35,10 @@ type KarmaModule struct {
 
 var karmaRegexp = regexp.MustCompile(`^([^\+]+)(\+\+|--)$`)
 
-func (k *KarmaModule) Init(i *Irc, config json.RawMessage) {
+func (k *KarmaModule) Init(c *irc.Conn, config json.RawMessage) {
 	db.AutoMigrate(&Karma{})
-	i.AddCommand("karma", k.karmaCmdHandler)
-	i.AddMatch(karmaRegexp, k.collectorHandler)
+	c.HandleBG("PRIVMSG", NewBangCmd("karma", k.karmaCmdHandler))
+	c.HandleBG("PRIVMSG", NewRegexpMatch(karmaRegexp, k.collectorHandler))
 }
 
 func (k *KarmaModule) karmaCmdHandler(conn *irc.Conn, cmd *Cmd) {
@@ -56,7 +57,7 @@ func (k *KarmaModule) karmaCmdHandler(conn *irc.Conn, cmd *Cmd) {
 }
 
 func (k *KarmaModule) collectorHandler(conn *irc.Conn, msg *Privmsg, match []string) {
-	nickStr := match[0]
+	nickStr := match[1]
 	if msg.Nick == nickStr {
 		msg.RespondToNick(conn, "You can't karama yourself, you'll go blind!")
 		return
@@ -64,14 +65,29 @@ func (k *KarmaModule) collectorHandler(conn *irc.Conn, msg *Privmsg, match []str
 
 	nick := conn.StateTracker().GetNick(nickStr)
 	if nick == nil {
-		// not a valid nick
+		log.WithFields(logrus.Fields{
+			"srcNick": msg.Nick,
+			"dstNick": nickStr,
+			"channel": msg.Channel,
+		}).Debug("Karma: unknown nick")
 		return
 	}
 	_, isOnChan := nick.IsOnStr(msg.Channel)
 	if !isOnChan {
-		// nick is not in the current channel
+		log.WithFields(logrus.Fields{
+			"srcNick": msg.Nick,
+			"dstNick": nickStr,
+			"channel": msg.Channel,
+		}).Debug("Karma: nick not in the current channel")
 		return
 	}
+
+	log.WithFields(logrus.Fields{
+		"srcNick":   msg.Nick,
+		"dstNick":   nickStr,
+		"channel":   msg.Channel,
+		"direction": match[2],
+	}).Info("Karma: Updating nick")
 
 	var karma Karma
 	db.Where(Karma{Nick: nick.Nick}).FirstOrInit(&karma)

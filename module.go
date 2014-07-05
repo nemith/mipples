@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	irc "github.com/fluffle/goirc/client"
 )
 
 var module ModuleStore
@@ -11,7 +12,7 @@ func init() {
 }
 
 type Module interface {
-	Init(*Irc, json.RawMessage)
+	Init(*irc.Conn, json.RawMessage)
 }
 
 type ModuleStore struct {
@@ -28,9 +29,9 @@ func (m *ModuleStore) Register(name string, module Module) {
 	m.modules[name] = module
 }
 
-func (m *ModuleStore) InitModules(irc *Irc, config *Config) {
+func (m *ModuleStore) InitModules(conn *irc.Conn, config *Config) {
 	for name, module := range m.modules {
 		modConfig := config.ModuleConfig[name]
-		module.Init(irc, modConfig)
+		module.Init(conn, modConfig)
 	}
 }

@@ -27,8 +27,8 @@ type JNetModule struct {
 
 var prRegexp = regexp.MustCompile(`(?i)(pr[0-9]+)`)
 
-func (m *JNetModule) Init(i *Irc, config json.RawMessage) {
-	i.AddMatch(prRegexp, m.prHandler)
+func (m *JNetModule) Init(c *irc.Conn, config json.RawMessage) {
+	c.HandleBG("PRIVMSG", NewRegexpMatch(prRegexp, m.prHandler))
 
 	err := json.Unmarshal(config, &m.config)
 	if err != nil {
