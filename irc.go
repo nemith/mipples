@@ -40,6 +40,9 @@ func (bch BangCmdHandler) Handle(c *irc.Conn, line *irc.Line) {
 	}
 	if strings.HasPrefix(msg.Text, bch.command) {
 		log.WithFields(logrus.Fields{
+			"nick":    msg.Nick,
+			"channel": msg.Channel,
+			"text":    msg.Text,
 			"command": bch.command,
 		}).Debug("Executing irc command")
 		bch.handlerFunc(c, &Cmd{
@@ -72,6 +75,9 @@ func (rmh RegexpMatchHandler) Handle(c *irc.Conn, line *irc.Line) {
 		return
 	}
 	log.WithFields(logrus.Fields{
+		"nick":    msg.Nick,
+		"channel": msg.Channel,
+		"text":    msg.Text,
 		"matcher": rmh.matcher,
 		"matches": matches,
 	}).Debug("Executing irc regex matcher")

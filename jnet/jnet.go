@@ -80,6 +80,7 @@ func getPRTableRow(table *goquery.Selection, column string) string {
 }
 
 func (j *JNet) GetPR(prNumber string) (*JNetPR, error) {
+	prNumber = strings.ToUpper(prNumber)
 	query := url.Values{
 		"page": {"prcontent"},
 		"id":   {prNumber},
