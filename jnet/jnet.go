@@ -7,6 +7,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type JNet struct {
@@ -66,7 +67,7 @@ type JNetPR struct {
 	ReleaseNote    string
 	Severity       string
 	Status         string
-	LastModified   string
+	LastModified   time.Time
 	ResolvedIn     string
 	OS             string
 	Product        string
@@ -107,6 +108,9 @@ func (j *JNet) GetPR(prNumber string) (*JNetPR, error) {
 		return pr, err
 	}
 	doc, err := goquery.NewDocumentFromResponse(resp)
+	if err != nil {
+		return pr, err
+	}
 
 	prTable := doc.Find(`table[summary="prsearch results"]`)
 
@@ -119,11 +123,13 @@ func (j *JNet) GetPR(prNumber string) (*JNetPR, error) {
 	pr.ReleaseNote = getPRTableRow(prTable, "Release Note")
 	pr.Severity = getPRTableRow(prTable, "Severity")
 	pr.Status = getPRTableRow(prTable, "Status")
-	pr.LastModified = getPRTableRow(prTable, "Last Modified")
 	pr.ResolvedIn = getPRTableRow(prTable, "Resolved In")
 	pr.OS = getPRTableRow(prTable, "Operating System")
 	pr.Product = getPRTableRow(prTable, "Product")
 	pr.FunctionalArea = getPRTableRow(prTable, "Functional Area")
+
+	pr.LastModified = time.Parse("2006-01-02 15:04:05 MST",
+		getPRTableRow(prTable, "Last Modified"))
 
 	return pr, nil
 }

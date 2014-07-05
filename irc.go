@@ -98,7 +98,8 @@ func parsePrivmsg(line *irc.Line) *Privmsg {
 	}
 }
 
-func (m *Privmsg) respond(conn *irc.Conn, msg string, includeToNick bool) {
+func (m *Privmsg) respond(includeToNick bool, conn *irc.Conn, format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
 	if m.Public() {
 		if includeToNick {
 			msg = fmt.Sprintf("%s: %s", m.Nick, msg)
@@ -109,10 +110,10 @@ func (m *Privmsg) respond(conn *irc.Conn, msg string, includeToNick bool) {
 	}
 }
 
-func (m *Privmsg) Respond(conn *irc.Conn, msg string) {
-	m.respond(conn, msg, false)
+func (m *Privmsg) Respond(conn *irc.Conn, format string, args ...interface{}) {
+	m.respond(false, conn, format, args...)
 }
 
-func (m *Privmsg) RespondToNick(conn *irc.Conn, msg string) {
-	m.respond(conn, msg, true)
+func (m *Privmsg) RespondToNick(conn *irc.Conn, format string, args ...interface{}) {
+	m.respond(true, conn, format, args...)
 }

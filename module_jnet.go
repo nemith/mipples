@@ -38,15 +38,17 @@ func (m *JNetModule) Init(c *irc.Conn, config json.RawMessage) {
 }
 
 func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, match []string) {
+	prNumber := match[1]
+
 	tinyUrlChan := make(chan string)
 	go func(tinyUrlChan chan string) {
-		longUrl := jnet.PRUrl(match[1])
+		longUrl := jnet.PRUrl(prNumber)
 		shortUrl, err := tinyURL(longUrl)
 		if err != nil {
 			log.WithFields(logrus.Fields{
 				"longUrl":  longUrl,
 				"shortUrl": shortUrl,
-				"pr":       match[1],
+				"pr":       prNumber,
 				"error":    err,
 			}).Error("Jnet: Failed to resolve tinyURL")
 			tinyUrlChan <- longUrl
@@ -57,10 +59,10 @@ func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, match []string) {
 	prChan := make(chan *jnet.JNetPR)
 	go func(prChan chan *jnet.JNetPR) {
 		j := jnet.NewJNet(m.config.Username, m.config.Password)
-		pr, err := j.GetPR(match[1])
+		pr, err := j.GetPR(prNumber)
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"pr":    match[1],
+				"pr":    prNumber,
 				"error": err,
 			}).Error("Jnet: Failed to get PR information")
 			prChan <- nil
@@ -73,7 +75,7 @@ func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, match []string) {
 	pr := <-prChan
 
 	if pr == nil {
-		return
+		msg.RespondToNick(conn, "Failed to find PR information for %s - %s", prNumber, shortUrl)
 	}
 
 	var buf bytes.Buffer
