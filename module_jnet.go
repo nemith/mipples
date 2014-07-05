@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	irc "github.com/fluffle/goirc/client"
 	"github.com/nemith/mipples/jnet"
 	"io/ioutil"
@@ -37,16 +38,42 @@ func (m *JNetModule) Init(c *irc.Conn, config json.RawMessage) {
 }
 
 func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, match []string) {
-	jnet := jnet.NewJNet(m.config.Username, m.config.Password)
-	pr, err := jnet.GetPR(match[1])
-	if err != nil {
-		return
-	}
+	tinyUrlChan := make(chan string)
+	go func(tinyUrlChan chan string) {
+		longUrl := jnet.PRUrl(match[1])
+		shortUrl, err := tinyURL(longUrl)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"longUrl":  longUrl,
+				"shortUrl": shortUrl,
+				"pr":       match[1],
+				"error":    err,
+			}).Error("Jnet: Failed to resolve tinyURL")
+			tinyUrlChan <- longUrl
+		}
+		tinyUrlChan <- shortUrl
+	}(tinyUrlChan)
 
-	url, err := tinyURL(pr.URL)
-	if err != nil {
-		// Cannot get TinyURL. Return the ugly one.
-		url = pr.URL
+	prChan := make(chan *jnet.JNetPR)
+	go func(prChan chan *jnet.JNetPR) {
+		j := jnet.NewJNet(m.config.Username, m.config.Password)
+		pr, err := j.GetPR(match[1])
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"pr":    match[1],
+				"error": err,
+			}).Error("Jnet: Failed to get PR information")
+			prChan <- nil
+		}
+		prChan <- pr
+	}(prChan)
+
+	// Wait for reponses
+	shortUrl := <-tinyUrlChan
+	pr := <-prChan
+
+	if pr == nil {
+		return
 	}
 
 	var buf bytes.Buffer
@@ -57,20 +84,20 @@ func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, match []string) {
 		buf.WriteString(fmt.Sprintf(" Fixed in: %s", pr.ResolvedIn))
 	}
 	buf.WriteString(" - ")
-	buf.WriteString(url)
+	buf.WriteString(shortUrl)
 
 	msg.Respond(conn, buf.String())
 }
 
 func tinyURL(longURL string) (string, error) {
 	client := http.Client{}
-	url := url.URL{
+	apiURL := url.URL{
 		Scheme:   "http",
 		Host:     "tinyurl.com",
 		Path:     "api-create.php",
 		RawQuery: url.Values{"url": {longURL}}.Encode(),
 	}
-	resp, err := client.Get(url.String())
+	resp, err := client.Get(apiURL.String())
 	if err != nil {
 		return "", err
 	}

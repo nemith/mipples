@@ -79,26 +79,32 @@ func getPRTableRow(table *goquery.Selection, column string) string {
 	return strings.TrimSpace(table.Find(selectorText).NextFiltered("td").Text())
 }
 
-func (j *JNet) GetPR(prNumber string) (*JNetPR, error) {
+func PRUrl(prNumber string) string {
 	prNumber = strings.ToUpper(prNumber)
 	query := url.Values{
 		"page": {"prcontent"},
 		"id":   {prNumber},
 	}
-	url := url.URL{
+	prUrl := url.URL{
 		Scheme:   "https",
 		Host:     "prsearch.juniper.net",
 		Path:     "InfoCenter/index",
 		RawQuery: query.Encode(),
 	}
+	fmt.Println(prUrl.String())
+	return prUrl.String()
+}
+
+func (j *JNet) GetPR(prNumber string) (*JNetPR, error) {
+	prUrl := PRUrl(prNumber)
 
 	pr := &JNetPR{
-		URL: url.String(),
+		URL: prUrl,
 	}
 
-	resp, err := j.client.Get(url.String())
+	resp, err := j.client.Get(prUrl)
 	if err != nil {
-		return pr, nil
+		return pr, err
 	}
 	doc, err := goquery.NewDocumentFromResponse(resp)
 

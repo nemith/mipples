@@ -3,7 +3,6 @@ package main
 import (
 	irc "github.com/fluffle/goirc/client"
 	irclog "github.com/fluffle/goirc/logging"
-	"time"
 )
 
 func main() {
@@ -11,7 +10,7 @@ func main() {
 
 	irclog.SetLogger(LogrusAdapter{*log})
 
-	ircCfg := config.Network.IrcConfig()
+	ircCfg := config.Network.GoIrcConfig()
 	c := irc.Client(ircCfg)
 	c.EnableStateTracking()
 
