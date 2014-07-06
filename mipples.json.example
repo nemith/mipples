@@ -3,11 +3,13 @@
         "host": "chat.freenode.net",
         "ssl": true,
         "nick": "my_test_bot",
+        "pass": "my_pass",
         "channels": {
         	"#bottest1": {},
         	"#bottest2": {}
         },
         "on_connect_commands": ["PRIVMSG nickserv :identify mypassword"]
+        "join_wait_on" ["NOTICE", "NickServ!NickServ@services.", "You are now identified for mipples."]
     },
     "module_config": {
     	"karma": {

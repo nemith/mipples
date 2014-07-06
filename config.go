@@ -19,6 +19,7 @@ type ChannelConfig struct {
 type ConfigNetworks struct {
 	Nick          string                   `json:"nick"`
 	Server        string                   `json:"host"`
+	Pass          string                   `json:"pass"`
 	SSL           bool                     `json:"ssl,omitempty"`
 	Channels      map[string]ChannelConfig `json:"channels"`
 	OnConnectCmds []string                 `json:"on_connect_commands"`
@@ -28,6 +29,7 @@ func (cn *ConfigNetworks) GoIrcConfig() *irc.Config {
 	cfg := irc.NewConfig(cn.Nick)
 	cfg.SSL = cn.SSL
 	cfg.Server = cn.Server
+	cfg.Pass = cn.Pass
 
 	cfg.Me.Ident = "mipples"
 	cfg.Me.Name = "Mipples bot (http://github.com/nemith/mipples)"
