@@ -44,9 +44,9 @@ func (m *RFCModule) rfcHandler(conn *irc.Conn, msg *Privmsg, match []string) {
 		return
 	}
 
-	msg.Respond(conn, "%s - %s [%s] (%s %d) - %s",
-		rfcObject.DocID, rfcObject.Title, rfcObject.Status,
-		rfcObject.Month, rfcObject.Year, rfcObject.Url)
+	msg.Respond(conn, "%s: %s (%s %d) [%s]  - %s",
+		rfcObject.DocID, rfcObject.Title, rfcObject.Month, rfcObject.Year,
+		rfcObject.Status, rfcObject.Url)
 }
 
 func rfcFetchLoop(interval time.Duration) {
