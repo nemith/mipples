@@ -116,7 +116,7 @@ func TrimDocID(input string) string {
 // the ietf website.  Returns an io.ReadCloser of the XML document.
 func FetchIndex() (io.ReadCloser, error) {
 	client := http.Client{}
-	resp, err := client.Get("http://www.rfc-editor.org/rfc/rfc-index.xml")
+	resp, err := client.Get(RFCIndexURL)
 	if err != nil {
 		return nil, err
 	}

@@ -72,7 +72,7 @@ func NewMatchHandler(matcher *regexp.Regexp, handler MatchHandlerFunc) *MatchHan
 	}
 }
 
-func (h MatchHandler) Handle(c *irc.Conn, line *irc.Line) {
+func (h *MatchHandler) Handle(c *irc.Conn, line *irc.Line) {
 	msg := parsePrivmsg(line)
 
 	matches := h.matcher.FindStringSubmatch(msg.Text)
@@ -86,6 +86,40 @@ func (h MatchHandler) Handle(c *irc.Conn, line *irc.Line) {
 		"matcher": h.matcher,
 		"matches": matches,
 	}).Debug("Executing irc regex matcher")
+	h.handlerFunc(c, msg, matches)
+}
+
+type MatchAllHandlerFunc func(*irc.Conn, *Privmsg, [][]string)
+
+type MatchAllHandler struct {
+	matcher     *regexp.Regexp
+	handlerFunc MatchAllHandlerFunc
+}
+
+func NewMatchAllHandler(matcher *regexp.Regexp, handler MatchAllHandlerFunc) *MatchAllHandler {
+	log.WithFields(logrus.Fields{
+		"matcher": matcher,
+	}).Debug("Registering new irc regex all matcher")
+	return &MatchAllHandler{
+		matcher:     matcher,
+		handlerFunc: handler,
+	}
+}
+
+func (h *MatchAllHandler) Handle(c *irc.Conn, line *irc.Line) {
+	msg := parsePrivmsg(line)
+
+	matches := h.matcher.FindAllStringSubmatch(msg.Text, -1)
+	if matches == nil {
+		return
+	}
+	log.WithFields(logrus.Fields{
+		"nick":    msg.Nick,
+		"channel": msg.Channel,
+		"text":    msg.Text,
+		"matcher": h.matcher,
+		"matches": matches,
+	}).Debug("Executing irc regex all matcher")
 	h.handlerFunc(c, msg, matches)
 }
 

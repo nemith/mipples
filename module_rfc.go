@@ -23,7 +23,7 @@ type RFCModule struct {
 	config *RFCConfig
 }
 
-var rfcRegexp = regexp.MustCompile(`^(?i)(RFC\d+)$`)
+var rfcRegexp = regexp.MustCompile(`(?i)\b(RFC\d+)\b`)
 
 func (m *RFCModule) Init(c *irc.Conn, config json.RawMessage) {
 	err := json.Unmarshal(config, &m.config)
@@ -32,21 +32,30 @@ func (m *RFCModule) Init(c *irc.Conn, config json.RawMessage) {
 	}
 
 	go rfcFetchLoop(m.config.FetchInterval)
-	c.HandleBG("PRIVMSG", NewMatchHandler(rfcRegexp, m.rfcHandler))
+	c.HandleBG("PRIVMSG", NewMatchAllHandler(rfcRegexp, m.rfcHandler))
 }
 
-func (m *RFCModule) rfcHandler(conn *irc.Conn, msg *Privmsg, match []string) {
-	rfcObject := &RFC{}
-	rfcNum := rfc.TrimDocID(strings.ToUpper(match[1]))
-	db.Where(RFC{DocID: rfcNum}).First(rfcObject)
+func (m *RFCModule) rfcHandler(conn *irc.Conn, msg *Privmsg, matches [][]string) {
+	var rfcs []string
+	for _, match := range matches {
+		rfcs = append(rfcs, rfc.TrimDocID(strings.ToUpper(match[1])))
+	}
 
-	if rfcObject == nil {
+	var rfcObjects []RFC
+	db.Where("doc_id in (?)", rfcs).Find(&rfcObjects)
+
+	if len(rfcObjects) < 1 {
+		log.WithFields(logrus.Fields{
+			"rfc": rfcs,
+		}).Info("RFC Record not found in db")
 		return
 	}
 
-	msg.Respond(conn, "%s: %s (%s %d) [%s]  - %s",
-		rfcObject.DocID, rfcObject.Title, rfcObject.Month, rfcObject.Year,
-		rfcObject.Status, rfcObject.Url)
+	for _, rfcObject := range rfcObjects {
+		msg.Respond(conn, "%s: %s (%s %d) [%s]  - %s",
+			rfcObject.DocId, rfcObject.Title, rfcObject.Month, rfcObject.Year,
+			rfcObject.Status, rfcObject.Url)
+	}
 }
 
 func rfcFetchLoop(interval time.Duration) {
@@ -58,7 +67,7 @@ func rfcFetchLoop(interval time.Duration) {
 
 type RFC struct {
 	Id       int64
-	DocID    string `sql:"not null;unique"`
+	DocId    string `sql:"not null;unique"`
 	Title    string
 	Abstract string
 	Month    string
@@ -68,6 +77,10 @@ type RFC struct {
 	//	Obsoletes   RFC
 	//	ObsoletedBy RFC
 	//	UpdatedBy   RFC
+}
+
+func (k RFC) TableName() string {
+	return "rfcs"
 }
 
 func rfcFetcher() error {
@@ -89,7 +102,7 @@ func rfcFetcher() error {
 			"rfc": rfcEntry,
 		}).Debug("Inserting RFC into database")
 		rfcRow := RFC{
-			DocID:    string(rfcEntry.DocID),
+			DocId:    string(rfcEntry.DocID),
 			Title:    rfcEntry.Title,
 			Abstract: string(rfcEntry.Abstract),
 			Month:    rfcEntry.Month,
