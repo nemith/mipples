@@ -43,6 +43,14 @@
 			"Rev": "a9ac3e10a79a57705bf3920d3b537d90dd172eec"
 		},
 		{
+			"ImportPath": "github.com/jteeuwen/go-pkg-rss",
+			"Rev": "326d76d501cc7e634b1ef24570fa158998fe1ca2"
+		},
+		{
+			"ImportPath": "github.com/jteeuwen/go-pkg-xmlx",
+			"Rev": "745ca8545530e367a84936b2f67db0e502d960fb"
+		},
+		{
 			"ImportPath": "github.com/lib/pq/hstore",
 			"Rev": "6d16a400975d186dbbf6334350fca31721b6efe5"
 		},

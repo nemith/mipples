@@ -23,6 +23,21 @@
         "rfc": {
             "_comment": "Fetch interval is in minutes",
             "fetch_interval": 1440
+        },
+        "rss": {
+            "timeout": 5,
+            "feeds": [
+                {
+                    "name": "RFC",
+                    "url": "http://tools.ietf.org/html/new-rfcs.rss",
+                    "channels": ["#bottest1", "#bottest2"]
+                },
+                {
+                    "name": "IETF Draft",
+                    "url": "http://tools.ietf.org/html/new-ids.rss",
+                    "channels": ["#bottest1", "#bottest2"]
+                }
+            ]
         }
     }
 
