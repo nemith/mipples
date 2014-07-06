@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"regexp"
+
+	"github.com/nemith/mipples/jnet"
+	"github.com/nemith/mipples/tinyurl"
+
 	"github.com/Sirupsen/logrus"
 	irc "github.com/fluffle/goirc/client"
-	"github.com/nemith/mipples/jnet"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"regexp"
 )
 
 func init() {
@@ -44,7 +44,7 @@ func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, matches [][]string)
 		tinyUrlChan := make(chan string)
 		go func(tinyUrlChan chan string) {
 			longUrl := jnet.PRUrl(prNumber)
-			shortUrl, err := tinyURL(longUrl)
+			shortUrl, err := tinyurl.Tinyify(longUrl)
 			if err != nil {
 				log.WithFields(logrus.Fields{
 					"longUrl":  longUrl,
@@ -92,23 +92,4 @@ func (m *JNetModule) prHandler(conn *irc.Conn, msg *Privmsg, matches [][]string)
 
 		msg.Respond(conn, buf.String())
 	}
-}
-
-func tinyURL(longURL string) (string, error) {
-	client := http.Client{}
-	apiURL := url.URL{
-		Scheme:   "http",
-		Host:     "tinyurl.com",
-		Path:     "api-create.php",
-		RawQuery: url.Values{"url": {longURL}}.Encode(),
-	}
-	resp, err := client.Get(apiURL.String())
-	if err != nil {
-		return "", err
-	}
-	shortURL, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return string(shortURL), nil
 }

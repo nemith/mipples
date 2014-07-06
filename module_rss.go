@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nemith/mipples/tinyurl"
+
 	"github.com/Sirupsen/logrus"
 	irc "github.com/fluffle/goirc/client"
 	rss "github.com/jteeuwen/go-pkg-rss"
@@ -58,7 +60,7 @@ func (m *RSSModule) Init(c *irc.Conn, config json.RawMessage) {
 			if feed.URL == "" {
 				log.WithFields(logrus.Fields{
 					"feed": feed,
-				}).Error("RSS Feed has no URL")
+				}).Error("RSS: Feed has no URL")
 			}
 
 			timeout := feed.Timeout
@@ -66,7 +68,7 @@ func (m *RSSModule) Init(c *irc.Conn, config json.RawMessage) {
 				if m.config.Timeout < 1 {
 					log.WithFields(logrus.Fields{
 						"feed": feed,
-					}).Error("RSS Feed has no timeout or global timeout")
+					}).Error("RSS: Feed has no timeout or global timeout")
 				}
 				timeout = m.config.Timeout
 			}
@@ -102,14 +104,26 @@ func pollFeed(conn *irc.Conn, feedConfig *RSSFeedConfig, timeout int) {
 			for _, item := range reverseItems {
 				if rssLastSeen.Key == item.Key() {
 					log.WithFields(logrus.Fields{
-						"item":        item,
+						"item":        item.Title,
 						"lastseenkey": rssLastSeen.Key,
 						"item_key":    item.Key(),
-					}).Debug("Already seen this RSS item")
+					}).Debug("RSS: Already seen this RSS item")
 					break
 				}
+
+				// Tinyify item's url
+				shortURL, err := tinyurl.Tinyify(item.Links[0].Href)
+				if err != nil {
+					log.WithFields(logrus.Fields{
+						"longURL":  item.Links[0].Href,
+						"shortURL": shortURL,
+						"error":    err,
+					}).Error("RSS: Failed to resolve tinyURL")
+					shortURL = item.Links[0].Href
+				}
+
 				for _, channel := range feedConfig.Channels {
-					conn.Privmsg(channel, fmt.Sprintf("[RSS %s] %s - %s", tag, item.Title, item.Links[0].Href))
+					conn.Privmsg(channel, fmt.Sprintf("[RSS %s] %s - %s", tag, item.Title, shortURL))
 				}
 			}
 		}
@@ -121,16 +135,16 @@ func pollFeed(conn *irc.Conn, feedConfig *RSSFeedConfig, timeout int) {
 		}
 	}
 
-	chanHandler := func(feed *rss.Feed, newchannels []*rss.Channel) {}
+	//chanHandler := func(feed *rss.Feed, newchannels []*rss.Channel) {}
 
-	feed := rss.New(timeout, true, chanHandler, itemHandler)
+	feed := rss.New(timeout, true, nil, itemHandler)
 
 	for {
 		if err := feed.Fetch(feedConfig.URL, nil); err != nil {
 			log.WithFields(logrus.Fields{
 				"feed":  feed,
 				"error": err,
-			}).Error("Error retriving feed.")
+			}).Error("RSS: Error retriving feed.")
 		}
 
 		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
