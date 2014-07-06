@@ -87,7 +87,7 @@ func rfcFetcher() error {
 	for _, rfcEntry := range rfcIndex.RFCEntries {
 		log.WithFields(logrus.Fields{
 			"rfc": rfcEntry,
-		}).Debug("Fetching RFC Index")
+		}).Debug("Inserting RFC into database")
 		rfcRow := RFC{
 			DocID:    string(rfcEntry.DocID),
 			Title:    rfcEntry.Title,

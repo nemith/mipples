@@ -6,6 +6,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	irc "github.com/fluffle/goirc/client"
 	"regexp"
+	"strings"
 )
 
 func init() {
@@ -33,7 +34,7 @@ type KarmaModule struct {
 	config *KarmaConfig
 }
 
-var karmaRegexp = regexp.MustCompile(`^([^\+]+)(\+\+|--)$`)
+var karmaRegexp = regexp.MustCompile(`^(` + NickRegexp + `)(\+\+|--)$`)
 
 func (k *KarmaModule) Init(c *irc.Conn, config json.RawMessage) {
 	db.AutoMigrate(&Karma{})
@@ -46,7 +47,13 @@ func (k *KarmaModule) karmaCmdHandler(conn *irc.Conn, cmd *Cmd) {
 		cmd.RespondToNick(conn, "You must specifiy a nick to lookup karma on.")
 		return
 	}
-	nick := cmd.Args[0]
+	nick := strings.TrimSpace(cmd.Args[0])
+
+	log.WithFields(logrus.Fields{
+		"srcNick": cmd.Nick,
+		"dstNick": nick,
+		"channel": cmd.Channel,
+	}).Debug("Karma: Looking up nick")
 
 	var karma Karma
 	db.Where(Karma{Nick: nick}).FirstOrInit(&karma)
@@ -57,7 +64,7 @@ func (k *KarmaModule) karmaCmdHandler(conn *irc.Conn, cmd *Cmd) {
 }
 
 func (k *KarmaModule) collectorHandler(conn *irc.Conn, msg *Privmsg, match []string) {
-	nickStr := match[1]
+	nickStr := strings.TrimSpace(match[1])
 	if msg.Nick == nickStr {
 		msg.RespondToNick(conn, "You can't karama yourself, you'll go blind!")
 		return
@@ -72,6 +79,7 @@ func (k *KarmaModule) collectorHandler(conn *irc.Conn, msg *Privmsg, match []str
 		}).Debug("Karma: unknown nick")
 		return
 	}
+
 	_, isOnChan := nick.IsOnStr(msg.Channel)
 	if !isOnChan {
 		log.WithFields(logrus.Fields{

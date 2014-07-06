@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	NickRegexp = `(?i)[a-z;\[\]\\` + "`" + `_^{}|][a-z0-9;\[\]\\` + "`" + `_^{}|-]*`
+)
+
 type CommandHandlerFunc func(*irc.Conn, *Cmd)
 
 type Cmd struct {
