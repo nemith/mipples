@@ -112,9 +112,9 @@ func TrimDocID(input string) string {
 	return input[:numStart] + strings.TrimLeft(input[numStart:], "0")
 }
 
-// FetchRFCIndex will attempt to retreive the XML RFC Index document from
+// FetchIndex will attempt to retreive the XML RFC Index document from
 // the ietf website.  Returns an io.ReadCloser of the XML document.
-func FetchRFCIndex() (io.ReadCloser, error) {
+func FetchIndex() (io.ReadCloser, error) {
 	client := http.Client{}
 	resp, err := client.Get("http://www.rfc-editor.org/rfc/rfc-index.xml")
 	if err != nil {
@@ -123,12 +123,28 @@ func FetchRFCIndex() (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-// ParseRFCIndex takes an io.Reader and will parse the RFX index XML from it
+// ParseIndex takes an io.Reader and will parse the RFC index XML from it
 // and return a parsed RFCIndex
-func ParseRFCIndex(rawInput io.Reader) (*RFCIndex, error) {
+func ParseIndex(rawInput io.Reader) (*RFCIndex, error) {
 	index := &RFCIndex{}
 	decoder := xml.NewDecoder(rawInput)
 	if err := decoder.Decode(index); err != nil {
+		return nil, err
+	}
+	return index, nil
+}
+
+// FetchAndParseIndex is a convience function to fetch a new copy index from
+// the IETF website and parse the XML and return it
+func FetchAndParseIndex() (*RFCIndex, error) {
+	xmlBody, err := FetchIndex()
+	if err != nil {
+		return nil, err
+	}
+	defer xmlBody.Close()
+
+	index, err := ParseIndex(xmlBody)
+	if err != nil {
 		return nil, err
 	}
 	return index, nil

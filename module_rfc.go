@@ -16,19 +16,26 @@ func init() {
 
 type RFCConfig struct {
 	// Number of minutes between refreshing of the database
-	FetchInterval int `json:"fetch_interval"`
+	FetchInterval time.Duration `json:"fetch_interval"`
 }
 
-type RFCModule struct{}
+type RFCModule struct {
+	config *RFCConfig
+}
 
 var rfcRegexp = regexp.MustCompile(`^(?i)(RFC\d+)$`)
 
-func (k *RFCModule) Init(c *irc.Conn, config json.RawMessage) {
-	go rfcFetchLoop(5)
-	c.HandleBG("PRIVMSG", NewMatchHandler(rfcRegexp, k.rfcHandler))
+func (m *RFCModule) Init(c *irc.Conn, config json.RawMessage) {
+	err := json.Unmarshal(config, &m.config)
+	if err != nil {
+		panic(err)
+	}
+
+	go rfcFetchLoop(m.config.FetchInterval)
+	c.HandleBG("PRIVMSG", NewMatchHandler(rfcRegexp, m.rfcHandler))
 }
 
-func (k *RFCModule) rfcHandler(conn *irc.Conn, msg *Privmsg, match []string) {
+func (m *RFCModule) rfcHandler(conn *irc.Conn, msg *Privmsg, match []string) {
 	rfcObject := &RFC{}
 	rfcNum := rfc.TrimDocID(strings.ToUpper(match[1]))
 	db.Where(RFC{DocID: rfcNum}).First(rfcObject)
@@ -65,20 +72,12 @@ type RFC struct {
 
 func rfcFetcher() error {
 	log.Debug("Fetching RFC Index")
-	xml, err := rfc.FetchRFCIndex()
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"error": err,
-		}).Error("Failed to retreive rfc index")
-		return err
-	}
-	defer xml.Close()
 
-	rfcIndex, err := rfc.ParseRFCIndex(xml)
+	rfcIndex, err := rfc.FetchAndParseIndex()
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"error": err,
-		}).Error("Failed to parse rfc index xml")
+		}).Error("Failed to fetch and parse rfc index xml")
 	}
 
 	tx := db.Begin()
