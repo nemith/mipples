@@ -92,7 +92,6 @@ func PRUrl(prNumber string) string {
 		Path:     "InfoCenter/index",
 		RawQuery: query.Encode(),
 	}
-	fmt.Println(prUrl.String())
 	return prUrl.String()
 }
 
@@ -128,7 +127,7 @@ func (j *JNet) GetPR(prNumber string) (*JNetPR, error) {
 	pr.Product = getPRTableRow(prTable, "Product")
 	pr.FunctionalArea = getPRTableRow(prTable, "Functional Area")
 
-	pr.LastModified = time.Parse("2006-01-02 15:04:05 MST",
+	pr.LastModified, _ = time.Parse("2006-01-02 15:04:05 MST",
 		getPRTableRow(prTable, "Last Modified"))
 
 	return pr, nil
