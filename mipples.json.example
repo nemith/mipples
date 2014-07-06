@@ -1,0 +1,28 @@
+{
+    "network": {
+        "host": "chat.freenode.net",
+        "ssl": true,
+        "nick": "my_test_bot",
+        "channels": {
+        	"#bottest1": {},
+        	"#bottest2": {}
+        },
+        "on_connect_commands": ["PRIVMSG nickserv :identify mypassword"]
+    },
+    "module_config": {
+    	"karma": {
+    		"allow_decrement": true,
+    		"share_across_channels": true
+    	},
+    	"jnet": {
+    		"username": "myuser",
+    		"password": "mypass"
+    	},
+        "rfc": {
+            "_comment": "Fetch interval is in minutes",
+            "fetch_interval": 1440
+        }
+    }
+
+}
+
