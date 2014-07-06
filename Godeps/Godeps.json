@@ -1,0 +1,54 @@
+{
+	"ImportPath": "github.com/nemith/mipples",
+	"GoVersion": "go1.3",
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/cascadia",
+			"Comment": "null-30",
+			"Rev": "4f03c71bc42ba0015a68bea86422f0ecbb71bf70"
+		},
+		{
+			"ImportPath": "code.google.com/p/go.net/html",
+			"Comment": "null-136",
+			"Rev": "28ff664507e453c4455b8c65e701bbe2b2ac980d"
+		},
+		{
+			"ImportPath": "code.google.com/p/gomock/gomock",
+			"Rev": "6ce1aa0c50b8bfba3220119154c3a9f719e7de8d"
+		},
+		{
+			"ImportPath": "github.com/PuerkitoBio/goquery",
+			"Comment": "v0.3.2-22-ga3fdc62",
+			"Rev": "a3fdc62e311a44c5199b0ef323ee5e056c527ef1"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.2.0-9-g97978e5",
+			"Rev": "97978e5e5483a3f926c2bb6e19f9e2ff344e81f0"
+		},
+		{
+			"ImportPath": "github.com/fluffle/goirc/client",
+			"Rev": "7711182a726a44702722b6ed3194ab09dd91f227"
+		},
+		{
+			"ImportPath": "github.com/fluffle/goirc/logging",
+			"Rev": "7711182a726a44702722b6ed3194ab09dd91f227"
+		},
+		{
+			"ImportPath": "github.com/fluffle/goirc/state",
+			"Rev": "7711182a726a44702722b6ed3194ab09dd91f227"
+		},
+		{
+			"ImportPath": "github.com/jinzhu/gorm",
+			"Rev": "a9ac3e10a79a57705bf3920d3b537d90dd172eec"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/hstore",
+			"Rev": "6d16a400975d186dbbf6334350fca31721b6efe5"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-sqlite3",
+			"Rev": "191ca24657cf0916c2be12dfbe8a0647ace8d67a"
+		}
+	]
+}
