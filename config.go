@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	irc "github.com/fluffle/goirc/client"
 	"io/ioutil"
+
+	irc "github.com/fluffle/goirc/client"
 )
 
 type Config struct {
@@ -46,7 +48,29 @@ func loadConfig() *Config {
 	}
 
 	if err := json.Unmarshal(file, &config); err != nil {
-		panic(err)
+		syntaxErr, ok := err.(*json.SyntaxError)
+		if !ok {
+			log.Fatalf("Cannot read config: %s", err)
+		}
+
+		// We have a syntax error. Extract out the line number and friends.
+		// https://groups.google.com/forum/#!topic/golang-nuts/fizimmXtVfc
+		newline := []byte{'\x0a'}
+
+		// Calculate the start/end position of the line where the error is
+		start := bytes.LastIndex(file[:syntaxErr.Offset], newline) + 1
+		end := len(file)
+		if idx := bytes.Index(file[start:], newline); idx >= 0 {
+			end = start + idx
+		}
+
+		// Count the line number we're on plus the offset in the line
+		line := bytes.Count(file[:start], newline) + 1
+		pos := int(syntaxErr.Offset) - start - 1
+
+		log.Fatalf("Cannot read config. Error in line %d, char %d: %s\n%s",
+			line, pos, syntaxErr, file[start:end])
 	}
+
 	return config
 }
