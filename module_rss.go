@@ -129,10 +129,8 @@ func pollFeed(conn *irc.Conn, feedConfig *RSSFeedConfig, timeout int) {
 		}
 
 		// Write the first item to the last seen database
-		if rssLastSeen.Key != reverseItems[0].Key() {
-			rssLastSeen.Key = reverseItems[0].Key()
-			db.Save(&rssLastSeen)
-		}
+		rssLastSeen.Key = reverseItems[0].Key()
+		db.Save(&rssLastSeen)
 	}
 
 	feed := rss.New(timeout, true, nil, itemHandler)
