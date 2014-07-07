@@ -135,18 +135,25 @@ func pollFeed(conn *irc.Conn, feedConfig *RSSFeedConfig, timeout int) {
 		}
 	}
 
-	//chanHandler := func(feed *rss.Feed, newchannels []*rss.Channel) {}
-
 	feed := rss.New(timeout, true, nil, itemHandler)
 
 	for {
+		log.WithFields(logrus.Fields{
+			"feed": feedConfig.URL,
+		}).Info("RSS: Fetching rss feed")
+
 		if err := feed.Fetch(feedConfig.URL, nil); err != nil {
 			log.WithFields(logrus.Fields{
-				"feed":  feed,
+				"feed":  feedConfig.URL,
 				"error": err,
 			}).Error("RSS: Error retriving feed.")
 		}
 
-		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
+		log.WithFields(logrus.Fields{
+			"feed":              feedConfig.URL,
+			"secondsTillUpdate": feed.SecondsTillUpdate(),
+		}).Info("RSS: Waiting")
+
+		<-time.After(time.Duration(feed.SecondsTillUpdate()) * time.Second)
 	}
 }
