@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 
@@ -30,6 +31,7 @@ type ConfigNetworks struct {
 func (cn *ConfigNetworks) GoIrcConfig() *irc.Config {
 	cfg := irc.NewConfig(cn.Nick)
 	cfg.SSL = cn.SSL
+	cfg.SSLConfig = &tls.Config{ServerName: cn.Server}
 	cfg.Server = cn.Server
 	cfg.Pass = cn.Pass
 

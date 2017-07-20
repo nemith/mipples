@@ -7,7 +7,7 @@ import (
 var log = logrus.New()
 
 func init() {
-	log.Level = logrus.Debug // #Temporary
+	log.SetLevel(logrus.DebugLevel)
 }
 
 type LogrusAdapter struct {

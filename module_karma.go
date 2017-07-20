@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	irc "github.com/fluffle/goirc/client"
 	"regexp"
 	"strings"
+
+	"github.com/Sirupsen/logrus"
+	irc "github.com/fluffle/goirc/client"
 )
 
 func init() {
@@ -80,7 +81,7 @@ func (k *KarmaModule) collectorHandler(conn *irc.Conn, msg *Privmsg, match []str
 		return
 	}
 
-	_, isOnChan := nick.IsOnStr(msg.Channel)
+	_, isOnChan := nick.IsOn(msg.Channel)
 	if !isOnChan {
 		log.WithFields(logrus.Fields{
 			"srcNick": msg.Nick,

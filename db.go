@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var db gorm.DB
+var db *gorm.DB
 
 func init() {
 	var err error

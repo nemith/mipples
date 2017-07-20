@@ -1,0 +1,103 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "iTyK6+LglXn9zjYGbjMTLxtLXio=",
+			"path": "github.com/PuerkitoBio/goquery",
+			"revision": "8806ada2a4ab225c06e9106f9631be80932db7ce",
+			"revisionTime": "2017-06-23T16:21:02Z"
+		},
+		{
+			"checksumSHA1": "uf0TcCsPkx5ydgizHVfmMVMgU+A=",
+			"path": "github.com/Sirupsen/logrus",
+			"revision": "00386b3fbd637582f90cb17482dc3087646c0ac2",
+			"revisionTime": "2017-07-19T15:47:53Z"
+		},
+		{
+			"checksumSHA1": "2rWSos1D+xqNSGkvEMOG3pntod8=",
+			"path": "github.com/andybalholm/cascadia",
+			"revision": "349dd0209470eabd9514242c688c403c0926d266",
+			"revisionTime": "2016-12-24T14:14:13Z"
+		},
+		{
+			"checksumSHA1": "CkjxTzNLzd3KXZS5fbXmG9KVu/4=",
+			"path": "github.com/fluffle/goirc/client",
+			"revision": "2ece5aab675bac99b291f006e95710d8b9d0758e",
+			"revisionTime": "2017-06-02T21:39:41Z"
+		},
+		{
+			"checksumSHA1": "TpJhYJVip8wTO9sgWbyQQOaTvZc=",
+			"path": "github.com/fluffle/goirc/logging",
+			"revision": "2ece5aab675bac99b291f006e95710d8b9d0758e",
+			"revisionTime": "2017-06-02T21:39:41Z"
+		},
+		{
+			"checksumSHA1": "NXxmFrZZ60MRX1YSnHSNe1kdfcA=",
+			"path": "github.com/fluffle/goirc/state",
+			"revision": "2ece5aab675bac99b291f006e95710d8b9d0758e",
+			"revisionTime": "2017-06-02T21:39:41Z"
+		},
+		{
+			"checksumSHA1": "Jad8+ljkE2gnqYTLpb8pVjtQcFY=",
+			"path": "github.com/golang/mock/gomock",
+			"revision": "dbe9dea30dbc5b4b6d54c9ecf9a3b8f9b8e6556c",
+			"revisionTime": "2017-07-19T21:15:16Z"
+		},
+		{
+			"checksumSHA1": "IqQmIPZbwgzbZD4k7YX6Rj230pY=",
+			"path": "github.com/jinzhu/gorm",
+			"revision": "2a1463811ee1dc85d168fd639a2d4251d030e6e5",
+			"revisionTime": "2017-07-03T13:49:54Z"
+		},
+		{
+			"checksumSHA1": "VIp1lZm6joWhlNdwhady8u//qRw=",
+			"path": "github.com/jinzhu/inflection",
+			"revision": "1c35d901db3da928c72a72d8458480cc9ade058f",
+			"revisionTime": "2017-01-02T12:52:26Z"
+		},
+		{
+			"checksumSHA1": "0BML3eN8Nu7aMthd0H6Ze9WwNcs=",
+			"path": "github.com/jteeuwen/go-pkg-rss",
+			"revision": "72391e6fd7384785fa3c46a405214a616d6c4a1d",
+			"revisionTime": "2015-12-01T01:30:05Z"
+		},
+		{
+			"checksumSHA1": "XFra3ZlOkhp/C8FUxTuQnkitKI8=",
+			"path": "github.com/jteeuwen/go-pkg-xmlx",
+			"revision": "76f54ee73233b171ca9ee82ef837a1fc4d3809c0",
+			"revisionTime": "2015-12-01T01:29:46Z"
+		},
+		{
+			"checksumSHA1": "CmknXrMVBRJrx4LsIA9jEOmsLQQ=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "47fc4e5e9153645da45af6a86a5bce95e63a0f9e",
+			"revisionTime": "2017-07-10T14:00:56Z"
+		},
+		{
+			"checksumSHA1": "dr5+PfIRzXeN+l1VG+s0lea9qz8=",
+			"path": "golang.org/x/net/context",
+			"revision": "7b7efd8000731a766f6cbfa2c04010627521c66e",
+			"revisionTime": "2017-07-20T00:19:16Z"
+		},
+		{
+			"checksumSHA1": "vqc3a+oTUGX8PmD0TS+qQ7gmN8I=",
+			"path": "golang.org/x/net/html",
+			"revision": "7b7efd8000731a766f6cbfa2c04010627521c66e",
+			"revisionTime": "2017-07-20T00:19:16Z"
+		},
+		{
+			"checksumSHA1": "00eQaGynDYrv3tL+C7l9xH0IDZg=",
+			"path": "golang.org/x/net/html/atom",
+			"revision": "7b7efd8000731a766f6cbfa2c04010627521c66e",
+			"revisionTime": "2017-07-20T00:19:16Z"
+		},
+		{
+			"checksumSHA1": "QEm/dePZ0lOnyOs+m22KjXfJ/IU=",
+			"path": "golang.org/x/net/proxy",
+			"revision": "7b7efd8000731a766f6cbfa2c04010627521c66e",
+			"revisionTime": "2017-07-20T00:19:16Z"
+		}
+	],
+	"rootPath": "github.com/nemith/mipples"
+}
